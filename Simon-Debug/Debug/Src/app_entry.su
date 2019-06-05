@@ -1,0 +1,11 @@
+app_entry.c:225:13:APPE_SysStatusNot	0	static
+app_entry.c:231:13:APPE_SysUserEvtRx	8	static
+app_entry.c:215:13:Switch_On_HSI	0	static
+app_entry.c:86:6:APPE_Init	40	static
+app_entry.c:252:6:SCH_Idle	0	static
+app_entry.c:260:6:LPM_EnterStopMode	8	static
+app_entry.c:289:6:LPM_ExitStopMode	0	static
+app_entry.c:333:6:SCH_EvtIdle	0	static
+app_entry.c:338:6:shci_notify_asynch_evt	0	static
+app_entry.c:344:6:shci_cmd_resp_release	0	static
+app_entry.c:350:6:shci_cmd_resp_wait	0	static
