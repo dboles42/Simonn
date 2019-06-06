@@ -1,4 +1,0 @@
-p2p_client_app.c:227:30:Event_Handler	40	static
-p2p_client_app.c:152:6:P2PC_APP_Init	0	static
-p2p_client_app.c:178:6:P2PC_APP_Notification	0	static
-p2p_client_app.c:543:9:P2P_Client_APP_Get_State	0	static

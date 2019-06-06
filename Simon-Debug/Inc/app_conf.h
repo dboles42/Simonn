@@ -38,6 +38,10 @@
  * Define Advertising parameters
  */
 #define CFG_ADV_BD_ADDRESS                (0)
+#define CFG_FAST_CONN_ADV_INTERVAL_MIN    (0x80)   /**< 80ms */
+#define CFG_FAST_CONN_ADV_INTERVAL_MAX    (0xA0)  /**< 100ms */
+#define CFG_LP_CONN_ADV_INTERVAL_MIN      (0x640) /**< 1s */
+#define CFG_LP_CONN_ADV_INTERVAL_MAX      (0xFA0) /**< 2.5s */
 
 /**
  * Define IO Authentication
@@ -68,6 +72,17 @@
 #define CFG_MITM_PROTECTION             CFG_MITM_PROTECTION_REQUIRED
 
 /**
+ * Define PHY
+ */
+#define ALL_PHYS_PREFERENCE                             0x00
+#define RX_2M_PREFERRED                                 0x02
+#define TX_2M_PREFERRED                                 0x02
+#define TX_1M                                           0x01
+#define TX_2M                                           0x02
+#define RX_1M                                           0x01
+#define RX_2M                                           0x02 
+
+/**
 *   Identity root key used to derive LTK and CSRK
 */
 #define CFG_BLE_IRK     {0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0}
@@ -79,37 +94,45 @@
 
 /**< specific parameters */
 /*****************************************************/
-#define PUSH_BUTTON_SW1_EXTI_IRQHandler         EXTI4_IRQHandler
-#define CFG_MAX_CONNECTION                      1
-#define UUID_128BIT_FORMAT                      1
-#define CFG_DEV_ID_P2P_SERVER1                  (0x83)
-#define CONN_L(x) ((int)((x)/0.625f))
-#define CONN_P(x) ((int)((x)/1.25f))
-#define SCAN_P (0x320)
-#define SCAN_L (0x320)
-#define CONN_P1   (CONN_P(50))
-#define CONN_P2   (CONN_P(100))
-#define SUPERV_TIMEOUT (0x1F4)
-#define CONN_L1   (CONN_L(10))
-#define CONN_L2   (CONN_L(10))
-#define OOB_DEMO                                1   /* Out Of Box Demo */  
+#define PUSH_BUTTON_SW1_EXTI_IRQHandler                         EXTI4_IRQHandler
+#define PUSH_BUTTON_SW2_EXTI_IRQHandler                         EXTI0_IRQHandler
 
-#define CFG_MAX_CONNECTION                      1
-#define UUID_128BIT_FORMAT                      1
+#define P2P_SERVER1    1    /*1 = Device is Peripherique*/
+#define P2P_SERVER2    0
+#define P2P_SERVER3    0
+#define P2P_SERVER4    0
+#define P2P_SERVER5    0
+#define P2P_SERVER6    0
 
 #define CFG_DEV_ID_P2P_SERVER1                  (0x83)
+#define CFG_DEV_ID_P2P_SERVER2                  (0x84)
+#define CFG_DEV_ID_P2P_SERVER3                  (0x87)
+#define CFG_DEV_ID_P2P_SERVER4                  (0x88)
+#define CFG_DEV_ID_P2P_SERVER5                  (0x89)   
+#define CFG_DEV_ID_P2P_SERVER6                  (0x8A)   
+#define CFG_DEV_ID_P2P_ROUTER                   (0x85)
+
+#define  RADIO_ACTIVITY_EVENT   1          /* 1 for OOB Demo */
+
+/**
+* AD Element - Group B Feature
+*/ 
+/* LSB - First Byte */
+#define CFG_FEATURE_THREAD_SWITCH               (0x40)
+
+/* LSB - Second Byte */
+#define CFG_FEATURE_OTA_REBOOT                  (0x20)
 
 #define CONN_L(x) ((int)((x)/0.625f))
 #define CONN_P(x) ((int)((x)/1.25f))
-#define SCAN_P (0x320)
-#define SCAN_L (0x320)
-#define CONN_P1   (CONN_P(50))
-#define CONN_P2   (CONN_P(100))
-#define SUPERV_TIMEOUT (0x1F4)
-#define CONN_L1   (CONN_L(10))
-#define CONN_L2   (CONN_L(10))
 
-#define OOB_DEMO                                1   /* Out Of Box Demo */  
+  /*  L2CAP Connection Update request parameters used for test only with smart Phone */
+#define L2CAP_REQUEST_NEW_CONN_PARAM             0
+
+#define L2CAP_INTERVAL_MIN              CONN_P(1000) /* 1s */
+#define L2CAP_INTERVAL_MAX              CONN_P(1000) /* 1s */
+#define L2CAP_SLAVE_LATENCY             0x0000
+#define L2CAP_TIMEOUT_MULTIPLIER        0x1F4
 
 /******************************************************************************
  * BLE Stack
@@ -424,11 +447,8 @@ typedef enum
 /**< Add in that list all tasks that may send a ACI/HCI command */
 typedef enum
 {
-    CFG_TASK_START_SCAN_ID,
-    CFG_TASK_CONN_DEV_1_ID,
-    CFG_TASK_SEARCH_SERVICE_ID,
+    CFG_TASK_ADV_CANCEL_ID,
     CFG_TASK_SW1_BUTTON_PUSHED_ID,
-    CFG_TASK_CONN_UPDATE_ID,
     CFG_TASK_HCI_ASYNCH_EVT_ID,
 /* USER CODE BEGIN CFG_Task_Id_With_HCI_Cmd_t */
 
