@@ -95,7 +95,7 @@ uint8_t adxlReadIDSPI(void);
 
 void adxlWriteI2C (uint8_t reg, uint8_t value);
 void adxlMultiByteReadI2C(uint8_t reg, uint8_t *array);
-uint8_t adxlReadRegI2C(uint8_t reg, uint8_t value);
+uint8_t adxlReadRegI2C(uint8_t reg);
 void adxlInitI2C(void);
 
 

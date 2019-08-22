@@ -123,19 +123,8 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-		adxlMultiByteReadI2C(0x32, measurement);
-		x = ((measurement[1]<<8)|measurement[0]);
-		y = ((measurement[3]<<8)|measurement[2]);
-		z = ((measurement[5]<<8)|measurement[4]);
+	adxlTestMeasure();
 
-		xg = x * .0078;
-		yg = y * .0078;
-		zg = z * .0078;
-
-		printf("X:%f ", xg);
-		printf("Y:%f ", yg);
-		printf("Z:%f\n", zg);
-		HAL_Delay(100);
 
     /* USER CODE BEGIN 3 */
   }
@@ -524,6 +513,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void adxlTestMeasure()
+{
+	adxlMultiByteReadI2C(0x32, measurement);
+	x = ((measurement[1]<<8)|measurement[0]);
+	y = ((measurement[3]<<8)|measurement[2]);
+	z = ((measurement[5]<<8)|measurement[4]);
+
+	xg = x * .049;
+	yg = y * .049;
+	zg = z * .049;
+
+	printf("X:%f ", xg);
+	printf("Y:%f ", yg);
+	printf("Z:%f\n", zg);
+	HAL_Delay(1000);
+}
 
 /* USER CODE END 4 */
 
