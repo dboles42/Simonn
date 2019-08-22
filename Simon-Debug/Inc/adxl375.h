@@ -77,30 +77,29 @@ All registers in ADXL375 are 8 bits in length
 #define FIFO_STREAM 	(0x40) //FIFO holds samples until buffer is full and overwrites
 #define FIFO_TRIGGER	(0xC0) //FIFO holds samples till trigger
 
-//Shock Detection
+//ADXL 375  Constants
 #define SHOCK_THRESH (0x40) //~50g's
 #define SHOCK_WINDOW (0xA0) //~200ms Shock window (period of impact ~500hz)
-#define SINGLE_SHOCK (0x40) //Enable Single Shock Interrupt //defaults to INT1
+#define SINGLE_SHOCK (0x40) //Enable Single Shock Interrupt
+#define THRESH_SHOCK_SCALE (780) //780mg per LSB
+#define THRESHOLD_ACTIVITY (5*1000)/THRESH_SHOCK_SCALE
 
 //Power Modes TBD
 
 //I2C Addresses
 #define ADXL_ADDRESS_I2C 0xA6
-/*Function Prototypes*/
 
-void adxlWriteSPI(uint8_t address, uint8_t value);
-void adxlReadSPI(uint8_t address, uint8_t *ptr, uint8_t size);
-void adxlInitSPI(void);
-uint8_t adxlReadIDSPI(void);
+/*Function Prototypes*/
 
 void adxlWriteI2C (uint8_t reg, uint8_t value);
 void adxlMultiByteReadI2C(uint8_t reg, uint8_t *array);
 uint8_t adxlReadRegI2C(uint8_t reg);
-void adxlInitI2C(void);
+void adxlInitTestI2C(void);
+void adxlInitInterruptTest(void);
 
 
-//I/O Handles
-SPI_HandleTypeDef hspi1;
+
+// I/O Handles
 I2C_HandleTypeDef hi2c1;
 
 //Private Variables

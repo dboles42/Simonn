@@ -8,42 +8,6 @@
 #include "main.h"
 #include <stdio.h>
 
-void adxlWriteSPI (uint8_t address, uint8_t value)
-{
-	uint8_t data[2];
-	data[0] = address|MULTI_BYTE;  // multibyte write
-	data[1] = value;
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET); //PULL SPI CS PIN LOW;
-	HAL_SPI_Transmit (&hspi1, data, 2, 100);
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
-}
-
-void adxlReadSPI(uint8_t address, uint8_t *ptr, uint8_t size)
-{
-	address |= SPI_READ;  // read operation
-	address |= MULTI_BYTE;  // multibyte read
-	uint8_t data_rec;
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET); //PULL SPI CS PIN LOW;
-	HAL_SPI_Transmit (&hspi1, &address, 1, 100);
-	HAL_SPI_Receive (&hspi1, data_rec, 6, 100);
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
-}
-
-void adxlInitSPI(void)
-{
-	adxlWriteSPI(0x2d, 0x00);  // reset all bits
-	adxlWriteSPI(0x2d, 0x08);  // power_cntl measure and wake up 8hz
-}
-uint8_t adxlReadIDSPI(void)
-{
-	uint8_t address = REG_DEVID;
-	uint8_t value;
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET); //PULL SPI CS PIN LOW;
-	HAL_SPI_Transmit (&hspi1, &address, 1, 100);
-	HAL_SPI_Receive (&hspi1, &value, 1, 100);
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
-	return value;
-}
 
 void adxlWriteI2C(uint8_t reg, uint8_t value)
 {
@@ -65,13 +29,18 @@ uint8_t adxlReadRegI2C(uint8_t reg)
 	return value;
 }
 
-void adxlInitI2C(void)
+void adxlInitTestI2C(void)
 {
+
+	printf("ADXL Configured For Real Time Measurements\n");
+	adxlWriteI2C(REG_POWER_CTRL, 0x00);  // Put in standby mode for init
+	adxlWriteI2C(REG_INT_ENABLE, 0x00);
+
 	uint8_t regValue = 0;
 	regValue = adxlReadRegI2C(REG_DEVID); // read the DEVID Register
 	printf("Device ID:0x%x\n", regValue);
 
-	adxlWriteI2C(REG_BW_RATE, 0x0D);
+	adxlWriteI2C(REG_BW_RATE, BW_800HZ); //set Bandwidth to 800Hz
 	regValue = adxlReadRegI2C(REG_BW_RATE); // read the BandWidth Register
 	printf("BandWidth Rate:0x%x\n", regValue);
 
@@ -83,6 +52,30 @@ void adxlInitI2C(void)
 
 }
 
+void adxlInitInterruptTest(void)
+{
 
+	uint8_t regValue = 0;
+	printf("ADXL Configured For Interrupts\n");
+
+	adxlWriteI2C(REG_POWER_CTRL, 0x00);  // Put in standby mode for init
+
+	adxlWriteI2C(REG_BW_RATE, BW_800HZ);
+	regValue = adxlReadRegI2C(REG_BW_RATE);
+	printf("BandWidth Rate:0x%x\n", regValue);
+
+	adxlWriteI2C(REG_INT_ENABLE, 0x00); //Disable Interrupts Before Configuring
+	//adxlWriteI2C(REG_INT_MAP, 0x00); //Trigger Interrupt on INT1 when DATA_READY
+	adxlWriteI2C(REG_INT_MAP, 0x10); //Trigger Interrupt on INT2 when DATA_READY
+	adxlWriteI2C(REG_INT_ENABLE, 0x10); //Enable Interrupt when DATA_READY and ACTIVITY occurs
+	regValue = adxlReadRegI2C(REG_INT_ENABLE);
+	printf("Interrupt Enabled:0x%x\n", regValue);
+
+	adxlWriteI2C(REG_THRESH_ACT, THRESHOLD_ACTIVITY); //Set Activity THRESHOLD level for activity
+	regValue = adxlReadRegI2C(REG_THRESH_ACT);
+	printf("Activity Threshold:0x%x\n", regValue);
+	adxlWriteI2C(REG_POWER_CTRL, 0x08);  // power_cntl measure and wake up 8hz
+
+}
 
 

@@ -20,12 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "adxl375.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "adxl375.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,17 +44,24 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart1;
+
 RTC_HandleTypeDef hrtc;
-SPI_HandleTypeDef hspi1;
+
 PCD_HandleTypeDef hpcd_USB_FS;
 
-uint8_t measurement[6]; //measurement array
-int16_t x,y,z; //raw values
-float xg, yg, zg; //weighted values
-
 /* USER CODE BEGIN PV */
+
+volatile uint8_t measurement[6]; //measurement array
+volatile int16_t x,y,z; //raw values
+volatile float xg, yg, zg; //weighted values
+
+static float scaleFactor = .049;
+
+volatile uint8_t readModeFlag = 0;
+uint8_t intModeFlag;
 
 /* USER CODE END PV */
 
@@ -65,7 +71,6 @@ static void MX_GPIO_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_RTC_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
@@ -109,7 +114,6 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
-  MX_SPI1_Init();
   MX_USB_PCD_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
@@ -118,15 +122,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  adxlInitI2C();  // initialize adxl
+
   while (1)
   {
     /* USER CODE END WHILE */
 
-	adxlTestMeasure();
-
-
     /* USER CODE BEGIN 3 */
+	  if(readModeFlag == 1)
+	  {
+		  adxlTestMeasure();
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -391,46 +396,6 @@ static void MX_RTC_Init(void)
 }
 
 /**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 7;
-  hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
-
-}
-
-/**
   * @brief USB Initialization Function
   * @param None
   * @retval None
@@ -479,17 +444,21 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD2_Pin|LD3_Pin|LD1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : SPI_CS_Pin */
-  GPIO_InitStruct.Pin = SPI_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(SPI_CS_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : EXT_INT_ADXL_Pin */
+  GPIO_InitStruct.Pin = EXT_INT_ADXL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(EXT_INT_ADXL_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -504,30 +473,54 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : B2_Pin B3_Pin */
-  GPIO_InitStruct.Pin = B2_Pin|B3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  /*Configure GPIO pins : SW2_INT_Pin SW3_INT_Pin */
+  GPIO_InitStruct.Pin = SW2_INT_Pin|SW3_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
+
+
 void adxlTestMeasure()
 {
 	adxlMultiByteReadI2C(0x32, measurement);
-	x = ((measurement[1]<<8)|measurement[0]);
-	y = ((measurement[3]<<8)|measurement[2]);
-	z = ((measurement[5]<<8)|measurement[4]);
+	x = ((measurement[0])| measurement[1]<<8);
+	y = ((measurement[2])| measurement[3]<<8);
+	z = ((measurement[4])| measurement[5]<<8);
 
-	xg = x * .049;
-	yg = y * .049;
-	zg = z * .049;
+	xg = x * scaleFactor;
+	yg = y * scaleFactor;
+	zg = z * scaleFactor;
 
 	printf("X:%f ", xg);
 	printf("Y:%f ", yg);
 	printf("Z:%f\n", zg);
-	HAL_Delay(1000);
+
+	if(readModeFlag == 1)
+		HAL_Delay(500);
+}
+
+void runTestRoutine(uint8_t flag)
+{
+
+	if (flag == 1)
+	{
+		readModeFlag = 1;
+	}
+	else readModeFlag = 0;
 }
 
 /* USER CODE END 4 */
