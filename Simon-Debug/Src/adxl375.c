@@ -7,7 +7,7 @@
 #include "adxl375.h"
 #include "main.h"
 
-void adxlWrite (uint8_t address, uint8_t value)
+void adxlWriteSPI (uint8_t address, uint8_t value)
 {
 	uint8_t data[2];
 	data[0] = address|MULTI_BYTE;  // multibyte write
@@ -17,7 +17,7 @@ void adxlWrite (uint8_t address, uint8_t value)
 	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
 }
 
-void adxlRead(uint8_t address, uint8_t *ptr, uint8_t size)
+void adxlReadSPI(uint8_t address, uint8_t *ptr, uint8_t size)
 {
 	address |= SPI_READ;  // read operation
 	address |= MULTI_BYTE;  // multibyte read
@@ -28,12 +28,12 @@ void adxlRead(uint8_t address, uint8_t *ptr, uint8_t size)
 	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
 }
 
-void adxlInit(void)
+void adxlInitSPI(void)
 {
-	adxlWrite (0x2d, 0x00);  // reset all bits
-	adxlWrite (0x2d, 0x08);  // power_cntl measure and wake up 8hz
+	adxlWriteSPI(0x2d, 0x00);  // reset all bits
+	adxlWriteSPI(0x2d, 0x08);  // power_cntl measure and wake up 8hz
 }
-uint8_t adxlReadID (void)
+uint8_t adxlReadIDSPI(void)
 {
 	uint8_t address = REG_DEVID;
 	uint8_t value;
@@ -43,3 +43,35 @@ uint8_t adxlReadID (void)
 	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET); //PULL SPI CS PIN HIGH;
 	return value;
 }
+
+void adxlWriteI2C(uint8_t reg, uint8_t value)
+{
+	uint8_t data[2];
+	data[0] = reg;
+	data[1] = value;
+	HAL_I2C_Master_Transmit (&hi2c1, ADXL_ADDRESS_I2C, data, 2, 100);
+}
+
+void adxlMultiByteReadI2C(uint8_t reg, uint8_t *array)
+{
+	HAL_I2C_Mem_Read (&hi2c1, ADXL_ADDRESS_I2C, reg, 1, (uint8_t *)array, 6, 100);
+}
+
+uint8_t adxlReadRegI2C(uint8_t reg, uint8_t value)
+{
+	HAL_I2C_Mem_Read (&hi2c1, ADXL_ADDRESS_I2C, reg, 1, &value, 1, 100);
+	return value;
+}
+
+void adxlInitI2C(void)
+{
+	uint8_t deviceID = 0;
+	adxlReadRegI2C(REG_DEVID, deviceID); // read the DEVID
+	adxlWriteI2C(REG_POWER_CTRL, 0x00);  // reset all bits
+	adxlWriteI2C(REG_POWER_CTRL, 0x08);  // power_cntl measure and wake up 8hz
+
+}
+
+
+
+

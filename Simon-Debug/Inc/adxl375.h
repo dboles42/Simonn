@@ -84,14 +84,27 @@ All registers in ADXL375 are 8 bits in length
 
 //Power Modes TBD
 
+//I2C Addresses
+#define ADXL_ADDRESS_I2C 0xA6
 /*Function Prototypes*/
 
-void adxlWrite (uint8_t address, uint8_t value);
-void adxlRead(uint8_t address, uint8_t *ptr, uint8_t size);
-void adxlInit(void);
-uint8_t adxlReadID (void);
+void adxlWriteSPI(uint8_t address, uint8_t value);
+void adxlReadSPI(uint8_t address, uint8_t *ptr, uint8_t size);
+void adxlInitSPI(void);
+uint8_t adxlReadIDSPI(void);
 
+void adxlWriteI2C (uint8_t reg, uint8_t value);
+void adxlMultiByteReadI2C(uint8_t reg, uint8_t *array);
+uint8_t adxlReadRegI2C(uint8_t reg, uint8_t value);
+void adxlInitI2C(void);
+
+
+//I/O Handles
 SPI_HandleTypeDef hspi1;
+I2C_HandleTypeDef hi2c1;
+
+//Private Variables
+
 
 
 
