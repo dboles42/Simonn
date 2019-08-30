@@ -30,6 +30,7 @@
 #include "dbg_trace.h"
 #include "hw_conf.h"
 #include "otp.h"
+#include "adxl375.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +58,14 @@ UART_HandleTypeDef huart1;
 PCD_HandleTypeDef hpcd_USB_FS;
 
 /* USER CODE BEGIN PV */
+volatile uint8_t measurement[6]; //measurement array
+volatile int16_t x,y,z; //raw values
+volatile float xg, yg, zg; //weighted values
 
+static float scaleFactor = .049;
+
+volatile uint8_t readModeFlag = 0;
+uint8_t intModeFlag;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -471,6 +479,37 @@ void Config_HSE(void)
   }
 
   return;
+}
+
+void adxlTestMeasure()
+{
+	adxlMultiByteReadI2C(0x32, measurement);
+	x = ((measurement[0])| measurement[1]<<8);
+	y = ((measurement[2])| measurement[3]<<8);
+	z = ((measurement[4])| measurement[5]<<8);
+
+	xg = x * scaleFactor;
+	yg = y * scaleFactor;
+	zg = z * scaleFactor;
+
+	printf("X:%f ", xg);
+	printf("Y:%f ", yg);
+	printf("Z:%f\n", zg);
+
+	if(readModeFlag == 1)
+		HAL_Delay(500);
+	return;
+}
+
+void runTestRoutine(uint8_t flag)
+{
+
+	if (flag == 1)
+	{
+		readModeFlag = 1;
+	}
+	else readModeFlag = 0;
+	return;
 }
 /* USER CODE END 4 */
 
