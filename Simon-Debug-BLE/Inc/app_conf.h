@@ -39,9 +39,9 @@
  */
 #define CFG_ADV_BD_ADDRESS                (0)
 #define CFG_FAST_CONN_ADV_INTERVAL_MIN    (0x80)   /**< 80ms */
-#define CFG_FAST_CONN_ADV_INTERVAL_MAX    (0xA0)  /**< 100ms */
+#define CFG_FAST_CONN_ADV_INTERVAL_MAX    (0xa0)  /**< 100ms */
 #define CFG_LP_CONN_ADV_INTERVAL_MIN      (0x640) /**< 1s */
-#define CFG_LP_CONN_ADV_INTERVAL_MAX      (0xFA0) /**< 2.5s */
+#define CFG_LP_CONN_ADV_INTERVAL_MAX      (0xfa0) /**< 2.5s */
 
 /**
  * Define IO Authentication
@@ -441,6 +441,7 @@ typedef enum
     CFG_TASK_ADV_CANCEL_ID,
     CFG_TASK_SW1_BUTTON_PUSHED_ID,
     CFG_TASK_HCI_ASYNCH_EVT_ID,
+  CFG_IdleTask_Update_Parameter,
 /* USER CODE BEGIN CFG_Task_Id_With_HCI_Cmd_t */
 	CFG_TASK_SW2_BUTTON_PUSHED_ID,
 	CFG_TASK_SW3_BUTTON_PUSHED_ID,

@@ -45,10 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
-UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart1;
-
-RTC_HandleTypeDef hrtc;
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
@@ -68,11 +65,10 @@ uint8_t intModeFlag;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_LPUART1_UART_Init(void);
-static void MX_USART1_UART_Init(void);
-static void MX_RTC_Init(void);
-static void MX_USB_PCD_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_RF_Init(void);
+static void MX_USART1_UART_Init(void);
+static void MX_USB_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -111,11 +107,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_LPUART1_UART_Init();
-  MX_USART1_UART_Init();
-  MX_RTC_Init();
-  MX_USB_PCD_Init();
   MX_I2C1_Init();
+  MX_RF_Init();
+  MX_USART1_UART_Init();
+  MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -160,9 +155,8 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI1
-                              |RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE
-                              |RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE
+                              |RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
@@ -170,7 +164,6 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -194,21 +187,20 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks 
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RTC
-                              |RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_LPUART1
-                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_USB;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RFWAKEUP
+                              |RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1
+                              |RCC_PERIPHCLK_USB;
   PeriphClkInitStruct.PLLSAI1.PLLN = 24;
   PeriphClkInitStruct.PLLSAI1.PLLP = RCC_PLLP_DIV2;
   PeriphClkInitStruct.PLLSAI1.PLLQ = RCC_PLLQ_DIV2;
   PeriphClkInitStruct.PLLSAI1.PLLR = RCC_PLLR_DIV2;
   PeriphClkInitStruct.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_USBCLK;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-  PeriphClkInitStruct.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
   PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  PeriphClkInitStruct.RFWakeUpClockSelection = RCC_RFWKPCLKSOURCE_LSE;
   PeriphClkInitStruct.SmpsClockSelection = RCC_SMPSCLKSOURCE_HSE;
-  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLKDIV_RANGE1;
+  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLKDIV_RANGE0;
 
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -266,50 +258,23 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief LPUART1 Initialization Function
+  * @brief RF Initialization Function
   * @param None
   * @retval None
   */
-static void MX_LPUART1_UART_Init(void)
+static void MX_RF_Init(void)
 {
 
-  /* USER CODE BEGIN LPUART1_Init 0 */
+  /* USER CODE BEGIN RF_Init 0 */
 
-  /* USER CODE END LPUART1_Init 0 */
+  /* USER CODE END RF_Init 0 */
 
-  /* USER CODE BEGIN LPUART1_Init 1 */
+  /* USER CODE BEGIN RF_Init 1 */
 
-  /* USER CODE END LPUART1_Init 1 */
-  hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 9600;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
-  hlpuart1.Init.StopBits = UART_STOPBITS_1;
-  hlpuart1.Init.Parity = UART_PARITY_NONE;
-  hlpuart1.Init.Mode = UART_MODE_TX_RX;
-  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  hlpuart1.FifoMode = UART_FIFOMODE_DISABLE;
-  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN LPUART1_Init 2 */
+  /* USER CODE END RF_Init 1 */
+  /* USER CODE BEGIN RF_Init 2 */
 
-  /* USER CODE END LPUART1_Init 2 */
+  /* USER CODE END RF_Init 2 */
 
 }
 
@@ -330,7 +295,7 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.WordLength = UART_WORDLENGTH_7B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
@@ -358,40 +323,6 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
-  * @brief RTC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_RTC_Init(void)
-{
-
-  /* USER CODE BEGIN RTC_Init 0 */
-
-  /* USER CODE END RTC_Init 0 */
-
-  /* USER CODE BEGIN RTC_Init 1 */
-
-  /* USER CODE END RTC_Init 1 */
-  /** Initialize RTC Only 
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 127;
-  hrtc.Init.SynchPrediv = 255;
-  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN RTC_Init 2 */
-
-  /* USER CODE END RTC_Init 2 */
 
 }
 
@@ -446,19 +377,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD2_Pin|LD3_Pin|LD1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : EXT_INT_ADXL_Pin */
-  GPIO_InitStruct.Pin = EXT_INT_ADXL_Pin;
+  /*Configure GPIO pin : ADXL_INT_Pin */
+  GPIO_InitStruct.Pin = ADXL_INT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(EXT_INT_ADXL_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ADXL_INT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -473,8 +396,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SW2_INT_Pin SW3_INT_Pin */
-  GPIO_InitStruct.Pin = SW2_INT_Pin|SW3_INT_Pin;
+  /*Configure GPIO pins : SW2_Pin SW3_Pin */
+  GPIO_InitStruct.Pin = SW2_Pin|SW3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);

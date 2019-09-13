@@ -34,6 +34,7 @@
 #include "lpm.h"
 #include "otp.h"
 #include "p2p_server_app.h"
+#include "template_server_app.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -238,7 +239,7 @@ uint8_t index_con_int, mutex;
  * Advertising Data
  */
 #if (P2P_SERVER1 != 0)
-static const char local_name[] = { AD_TYPE_COMPLETE_LOCAL_NAME ,'P','2','P','S','R','V','1'};
+static const char local_name[] = { AD_TYPE_COMPLETE_LOCAL_NAME ,'P','2','P','S','R','V','4'};
 uint8_t manuf_data[14] = {
     sizeof(manuf_data)-1, AD_TYPE_MANUFACTURER_SPECIFIC_DATA, 
     0x01/*SKD version */,
@@ -461,6 +462,12 @@ void APP_BLE_Init( void )
    * Initialize P2P Server Application
    */
   P2PS_APP_Init();
+
+  /**
+   * Initialize Custom Server Application
+   */
+  TEMPLATE_APP_Init();
+  
 
   /**
    * Create timer to handle the Advertising Stop

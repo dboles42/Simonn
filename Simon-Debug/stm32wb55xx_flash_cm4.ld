@@ -11,7 +11,7 @@
 **
 **  Environment : System Workbench for MCU
 **
-**  Distribution: The file is distributed “as is,” without any warranty
+**  Distribution: The file is distributed â€œas is,â€� without any warranty
 **                of any kind.
 **
 *****************************************************************************
@@ -56,7 +56,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
 FLASH (rx)                 : ORIGIN = 0x08000000, LENGTH = 512K
-RAM1 (xrw)                 : ORIGIN = 0x20000004, LENGTH = 191K
+RAM1 (xrw)                 : ORIGIN = 0x20000004, LENGTH = 0x2FFFC
 RAM_SHARED (xrw)           : ORIGIN = 0x20030000, LENGTH = 10K
 }
 

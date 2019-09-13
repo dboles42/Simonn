@@ -60,9 +60,9 @@ void runTestRoutine(uint8_t flag);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define EXT_INT_ADXL_Pin GPIO_PIN_8
-#define EXT_INT_ADXL_GPIO_Port GPIOA
-#define EXT_INT_ADXL_EXTI_IRQn EXTI9_5_IRQn
+#define ADXL_INT_Pin GPIO_PIN_8
+#define ADXL_INT_GPIO_Port GPIOA
+#define ADXL_INT_EXTI_IRQn EXTI9_5_IRQn
 #define B1_Pin GPIO_PIN_4
 #define B1_GPIO_Port GPIOC
 #define LD2_Pin GPIO_PIN_0
@@ -73,12 +73,12 @@ void runTestRoutine(uint8_t flag);
 #define JTMS_GPIO_Port GPIOA
 #define JTCK_Pin GPIO_PIN_14
 #define JTCK_GPIO_Port GPIOA
-#define SW2_INT_Pin GPIO_PIN_0
-#define SW2_INT_GPIO_Port GPIOD
-#define SW2_INT_EXTI_IRQn EXTI0_IRQn
-#define SW3_INT_Pin GPIO_PIN_1
-#define SW3_INT_GPIO_Port GPIOD
-#define SW3_INT_EXTI_IRQn EXTI1_IRQn
+#define SW2_Pin GPIO_PIN_0
+#define SW2_GPIO_Port GPIOD
+#define SW2_EXTI_IRQn EXTI0_IRQn
+#define SW3_Pin GPIO_PIN_1
+#define SW3_GPIO_Port GPIOD
+#define SW3_EXTI_IRQn EXTI1_IRQn
 #define JTDO_Pin GPIO_PIN_3
 #define JTDO_GPIO_Port GPIOB
 #define LD1_Pin GPIO_PIN_5
